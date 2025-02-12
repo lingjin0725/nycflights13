@@ -1,0 +1,178 @@
+---
+title: "Stat 437 HW2"
+author:
+- Ling Jin (Student ID: 011880184)
+header-includes:
+- \usepackage{bbm}
+- \usepackage{amssymb}
+- \usepackage{amsmath}
+- \usepackage{graphicx,float}
+- \usepackage{natbib}
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+fontsize: 11pt
+---
+
+```{r, echo=FALSE, warning=FALSE}
+library(knitr)
+opts_chunk$set(tidy.opts=list(width.cutoff=60),tidy=TRUE)
+```
+
+# Problem 1
+Please refer to the NYC flight data `nycflights13` that has been discussed in the lecture notes and whose manual can be found at https://cran.r-project.org/web/packages/nycflights13/index.html. We will use `flights`, a tibble from `nycflights13`.
+You are interested in looking into the average `arr_delay` for 4 different `month` 12, 1, 7 and 8, for 3 different `carrier` "UA", "AA" and "DL", and for `distance` that are greater than 700 miles, since you suspect that colder months and longer distances may result in longer average arrival delays. Note that you need to extract observations from `flights`, and that you are required to use `dplyr` for this purpose. 
+The following tasks and questions are based on the extracted observations.
+
+#### (1.a) 
+For each combination of the values of `carrier` and `month`, obtain the average `arr_delay` and obtain the average `distance`. Plot the average `arr_delay` against the average `distance`, use `carrier` as facet; add a title "Base plot" and center the title in the plot. This will be your base plot, say, as object `p`. Show the plot `p`.
+
+```{r}
+library(nycflights13)
+library(dplyr)
+library(ggplot2)
+
+# Filtering data
+filtered_flights <- flights %>%
+  filter(month %in% c(12, 1, 7, 8), 
+         carrier %in% c("UA", "AA", "DL"), 
+         distance > 700) %>%
+  group_by(carrier, month) %>%
+  summarise(avg_arr_delay = mean(arr_delay, na.rm = TRUE), 
+            avg_distance = mean(distance, na.rm = TRUE))
+
+print(filtered_flights)
+
+p <- ggplot(filtered_flights, aes(x = avg_distance, y = avg_arr_delay)) +
+  geom_point(color = "blue", size = 3) +
+  facet_wrap(~ carrier) +
+  labs(title = "Base plot", x = "Average Distance (miles)", y = "Average Arrival Delay (minutes)") +
+  theme(plot.title = element_text(hjust = 0.5),
+        text = element_text(size = 14))
+
+print(p)
+```
+
+#### Interpretation:
+The Base Plot shows the relationship between average arrival delay and average distance for flights operated by AA, DL, and UA during January, July, August, and December. While AA's delays remain moderate (0-10 minutes) across distances, DL has a high delay outlier (~16 minutes at 1300 miles), and UA exhibits a trend where longer flights (~1700 miles) experience increasing delays (~10-15 minutes). This suggests that UA's long-haul flights may be more prone to delays, while AA and DL show more variability.
+
+
+#### (1.b) 
+Modify `p` as follows to get a plot `p1`: connect the points for each `carrier` via one type of dashed line; code the 3 levels of `carrier` as $\alpha_1$, $\beta_{1,2}$ and $\gamma^{[0]}$, and display them in the strip texts; change the legend title into "My $\zeta$" (this legend is induced when you connect points for each `carrier` by a type of line), and put the legend in horizontal direction at the bottom of the plot; add a title "With math expressions" and center the title in the plot. Show the plot `p1`.
+```{r}
+filtered_flights <- flights %>%
+  filter(month %in% c(12, 1, 7, 8), 
+         carrier %in% c("UA", "AA", "DL"), 
+         distance > 700) %>%
+  group_by(carrier, month) %>%
+  summarise(avg_arr_delay = mean(arr_delay, na.rm = TRUE), 
+            avg_distance = mean(distance, na.rm = TRUE))
+
+filtered_flights$carrier <- factor(filtered_flights$carrier, 
+                                   levels = c("AA", "DL", "UA"), 
+                                   labels = c(expression(alpha[1]), 
+                                              expression(beta[1 * "," * 2]), 
+                                              expression(gamma^0)))
+
+p1 <- ggplot(filtered_flights, aes(x = avg_distance, y = avg_arr_delay, group = carrier, linetype = carrier)) +
+  geom_point(color = "blue", size = 3) +  
+  geom_line() + 
+  facet_wrap(~ carrier, labeller = label_parsed) +  
+  labs(title = "With math expressions", 
+       x = "Average Distance (miles)", 
+       y = "Average Arrival Delay (minutes)", 
+       linetype = expression("My " * zeta)) +  
+  theme(plot.title = element_text(hjust = 0.5),  
+        legend.position = "bottom",  
+        legend.direction = "horizontal",  
+        text = element_text(size = 14))
+
+print(p1)
+```
+
+#### Interpretation:
+From the visualization, United Airlines($\gamma^{[0]}$) shows a noticeable increasing trend in delays as the average distance increases, suggesting that longer flights may be more prone to delays. Delta Airlines($\beta_{1,2}$) has a high delay (~16 min) at a shorter distance (~1300 miles), which could indicate an operational anomaly or external disruption. American Airlines($\alpha_1$) has moderate variability, with delays fluctuating between 0-10 minutes, showing no strong correlation with distance. Overall, this refined visualization enhances interpretability by adding structure to the trends while improving clarity through mathematical notation and better legend organization.
+
+
+#### (1.c) 
+Modify `p1` as follows to get a plot `p2`: set the font size of strip text to be 12 and rotate the strip texts counterclockwise by 15 degrees; set the font size of the x-axis text to be 10 and rotate the x-axis text clockwise by 30 degrees; set the x-axis label as "$\hat{\mu}$ for mean arrival delay"; add a title "With front and text adjustments" and center the title in the plot. Show the plot `p2`
+```{r}
+filtered_flights <- flights %>%
+  filter(month %in% c(12, 1, 7, 8), 
+         carrier %in% c("UA", "AA", "DL"), 
+         distance > 700) %>%
+  group_by(carrier, month) %>%
+  summarise(avg_arr_delay = mean(arr_delay, na.rm = TRUE), 
+            avg_distance = mean(distance, na.rm = TRUE))
+
+filtered_flights$carrier <- factor(filtered_flights$carrier, 
+                                   levels = c("AA", "DL", "UA"), 
+                                   labels = c(expression(alpha[1]), 
+                                              expression(beta[1 * "," * 2]), 
+                                              expression(gamma^0)))
+
+p2 <- ggplot(filtered_flights, aes(x = avg_distance, y = avg_arr_delay, group = carrier, linetype = carrier)) +
+  geom_point(color = "blue", size = 3) +  
+  geom_line() +  
+  facet_wrap(~ carrier, labeller = label_parsed) +  
+  labs(title = "With font and text adjustments", 
+       x = expression(hat(mu) ~ " for mean arrival delay"),  
+       y = "Average Arrival Delay (minutes)", 
+       linetype = expression("My " * zeta)) +  
+  theme(plot.title = element_text(hjust = 0.5),  
+        legend.position = "bottom",  
+        legend.direction = "horizontal",  
+        strip.text = element_text(size = 12, angle = -15), 
+        axis.text.x = element_text(size = 10, angle = 30, hjust = 1))  
+
+print(p2)
+```
+
+#### Interpretation:
+The updated plot p2 enhances readability by adjusting text formatting. The strip text labels ($\alpha_1$, $\beta_{1,2}$ and $\gamma^{[0]}$) are now size 12 and rotated counterclockwise by 15 degrees, while the x-axis text is rotated clockwise by 30 degrees and set to size 10 for better visibility. The x-axis label is updated to $\hat{\mu}$) to denote the mean arrival delay, aligning with statistical notation.The title remains centered, and the legend stays at the bottom in a horizontal format, ensuring clear differentiation between carriers. These refinements improve the clarity of the visualization while maintaining the observed trends.
+
+
+# Problem 2 
+This problem requires you to visualize the binary relationship between members of a karate club as an undirected graph. Please install the R library `igraphdata`, from which you can obtain the data set `karate` and work on it. Create a graph for `karate`. Once you obtain the graph, you will see that each vertex is annotated by a number or letter. What do the numbers or letters refer to? Do you see subgraphs of the graph? If so, what do these subgraphs mean? 
+
+```{r}
+library(igraph)
+library(igraphdata)
+
+data("karate")
+print(karate)
+
+plot(karate, vertex.size = 20, vertex.label = V(karate)$name, 
+     main = "Karate Club Network", vertex.color ="lightblue")
+```
+
+#### Interpretation:
+The numbers or labels on the nodes in the Karate Club Network represent individual members of the club, with each connection showing a social interaction between them. Some key members, like "Mr. Hi", stand out as more central, meaning they had stronger influence or more connections in the group. Looking at the graph, we can clearly see two distinct clusters, which represent the split that happened in the club. This divide was caused by a conflict between the club’s instructor (Mr. Hi) and the administrator, leading members to take sides. These subgroups are a great example of how social networks naturally form based on relationships and influence.
+
+# Problem 3
+This problem requires to to create an interactive plot using `plotly`. If you want to display properly the plot in your HW answers, you may well need to set your HW document as an html file (instead of doc, docx or pdf file) when you compile your R codes.
+
+Please use the `mpg` data set we have discussed in the lectures. Create an interactive, scatter plot between "highway miles per gallon" `hwy` (on the y-axis) and "engine displacement in litres" `displ` (on the x-axis) with the `color` aesthetic designated by "number of cylinders" `cyl`, and set the x-axis label as "engine displacement in litres" and y-axis label as "highway miles per gallon". You need to check the object type for `cyl` and set it correctly when creating the plot. Add the title "# of cylinders" to the legend and adjust the vertical position of the legend, if you can. For the last, you may look through https://plotly.com/r/legend/ for help.
+
+```{r}
+library(ggplot2)
+library(plotly)
+
+p <- ggplot(mpg, aes(x = displ, y = hwy, color = cyl)) +
+  geom_point(size = 3, alpha = 0.7) +  
+  labs(title = "Engine Displacement vs. Highway MPG",
+       x = "Engine Displacement (litres)",
+       y = "Highway Miles per Gallon",
+       color = "# of Cylinders") +  
+  theme_minimal() +  
+  theme(legend.title = element_text(size = 12),  
+        legend.position = "top")  
+
+p_interactive <- ggplotly(p)
+p_interactive
+```
+
+#### Interpretation:
+This interactive scatter plot shows the relationship between engine displacement (in litres) and highway miles per gallon (MPG) for different vehicles, with color representing the number of cylinders. From the graph, there's a clear negative correlation—as engine displacement increases, highway MPG tends to decrease. This makes sense because larger engines generally consume more fuel, leading to lower fuel efficiency. Looking at the color gradient, vehicles with fewer cylinders (4 cylinders, darker shades) tend to have higher MPG and smaller engine displacements, while those with more cylinders (6 or 8, lighter shades) typically have larger displacements and lower MPG. This pattern aligns with expectations, as higher-cylinder engines are more powerful but less fuel-efficient. The interactive nature of the plot allows users to hover over points and explore specific vehicles, making it easier to analyze trends and exceptions in fuel efficiency across different engine types.
+
